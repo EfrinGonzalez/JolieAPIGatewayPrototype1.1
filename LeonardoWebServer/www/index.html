@@ -1,0 +1,25 @@
+<html>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<body>
+
+<div ng-app="myApp" ng-controller="customersCtrl"> 
+
+<h1>Requesting Persons table</h1>
+<ul>
+  <li ng-repeat="x in values">
+    {{ x.personid + ', ' + x.name }}
+  </li>
+</ul>
+
+</div>
+
+<script>
+
+var app = angular.module('myApp', []);
+app.controller('customersCtrl', function($scope, $http) {
+    $http.get("http://localhost:8001/retrieveAll")
+    .then(function(response) {$scope.values = response.data.values;});
+});
+</script>
+</body>
+</html>

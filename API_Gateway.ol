@@ -1,4 +1,5 @@
 include "console.iol"
+include "database.iol"
 include "time.iol"
 include "/Dynamic_Embedding_Counter/counterInterface.iol"
 include "/Dynamic_Embedding_Counter/embedderInterface.iol"
@@ -6,6 +7,8 @@ include "/Dynamic_Embedding_Counter/clientInterface.iol"
 include "/profileC_service/twiceInterface.iol"
 include "runtime.iol"
 include "authenticator.iol"
+
+execution{ single }
 
 outputPort CounterService{
 	Interfaces: CounterInterface
@@ -17,25 +20,46 @@ inputPort Gateway{
 	Interfaces: CounterEmbedderInterface, AuthenticatorInterface
 }
 	
-execution{ single }
+init
+{
+	with (connectionInfo) {
+		.username = "";
+		.password = "";
+		.host = "127.0.0.1";
+		.port = 3306;
+		.database = "test"; 		
+		.driver = "mysql"
+	};
+	connect@Database(connectionInfo)();
+	println@Console( "Database connection successful!!!")();
+	
+	q = "select * from service_registry where service_id=:1" ;
+	query@Database(q)(result);
+	
+	println@Console( "Service name: "+ result)()
+}
 
 main
 {
 
-//while( keepRunning ){	
-		//keepRunning = true;
+
 		embedInfo.type = "Jolie";
 		keepRunning = true;
 		login(request)(response){
+		//login(UserProfile)(response)	
+		//if(request == 1){
 		
-	
-	
-	
-			
-	
-	
-		if(request == 1){
+		
+		service_id = q.service_id;
+		
+		 //println@Console( "Testing DB" )();
+		 //println@Console( "Value from jolie: "+ service_id)();
+		
+		
 			//Loading profileA services
+			
+			
+			
 			embedInfo.filepath = "/profileA_service/ProfileA_Adapter.ol";
 			loadEmbeddedService@Runtime( embedInfo )( ProfileA_Adapter.location );
 			response = "Profile A services Loaded...";
@@ -43,37 +67,21 @@ main
 				keepRunning = true
 			}
 	
-		} else if(request == 2){	
-			//Loading profileB services
-			embedInfo.filepath = "/profileB_service/ProfileB_Adapter.ol";
-			loadEmbeddedService@Runtime( embedInfo )( ProfileB_Adapter.location );
-			response = "Profile B services Loaded...";
-			while( keepRunning ){	
-				keepRunning = true
-			}
-			
 	
-		
-		} else if(request == 3){	
-		
-			//Loading profileC services	
-			embedInfo.filepath = "/profileC_service/ProfileC_Adapter.ol";
-			loadEmbeddedService@Runtime( embedInfo )( ProfileC_Adapter.location );
-			
-			response = "Profile C services Loaded...";
-			while( keepRunning ){	
-				keepRunning = true
-			}
-			
-		} else{
-			keepRunning = false
-		}
+	
+	
+	
+	
+	
+	
+		//}   else{
+		//	keepRunning = false
+		//}
 		
 		
 	
 	}
 	
-	//}
 	
 	
 }

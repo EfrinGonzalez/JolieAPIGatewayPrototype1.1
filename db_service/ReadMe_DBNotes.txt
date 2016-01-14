@@ -18,3 +18,16 @@ password varchar(255),
 PRIMARY KEY (user_id)
 )
 
+CREATE TABLE service_registry
+(
+service_id int NOT NULL AUTO_INCREMENT,
+context varchar(255) NOT NULL,
+protocol varchar(255) NOT NULL,
+input_port varchar(255),
+filepath varchar(255),
+location varchar(255),
+PRIMARY KEY (service_id)
+)
+
+INSERT INTO service_registry (context, protocol, input_port, filepath, location)
+VALUES ('A','sodep', 'ProfileA','/profileA_service/ProfileA_Adapter.ol','socket://localhost:2001/');

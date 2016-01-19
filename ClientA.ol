@@ -6,7 +6,7 @@ include "/Dynamic_Embedding_Counter/clientInterface.iol"
 include "/profileC_service/twiceInterface.iol"
 include "authenticator.iol"
 
-inputPort CounterClient{
+inputPort ClientA{
 	Location: "socket://localhost:4002"
 	Protocol: sodep
 	Interfaces: CounterClientInterface
@@ -24,16 +24,30 @@ outputPort TwiceService {
 	Interfaces: TwiceInterface
 }
 
+outputPort ProfileA {
+	Location: "socket://localhost:2001/"
+	Protocol: sodep
+	Interfaces: AuthenticatorInterface	
+}
+
 main
 {
-	 request = args[0];
+
+	request = args[0];
+	 //Saying wich profile is loaded
+	 login@Gateway(request)|
+	 loadingMessage@ProfileA("ProfileA")
+	 
+	 
+	 
+	/* request = args[0];
 	 //Saying wich profile is loaded
 	 login@Gateway(request)(response)|
 	 println@Console(response)()|
 	 twiceJolie@TwiceService( 15 )( response );	
 	 //in the case profile three loads the java and jolie services
 	 println@Console( "Value from jolie: "+response )()
-	 
+	 */
 	 /*
 	 //calling the java methods through the java embedded classes.
 	intExample = 3;

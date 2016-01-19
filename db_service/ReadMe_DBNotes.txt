@@ -18,7 +18,7 @@ password varchar(255),
 PRIMARY KEY (user_id)
 )
 
-CREATE TABLE service_registry
+CREATE TABLE adapter_registry
 (
 service_id int NOT NULL AUTO_INCREMENT,
 context varchar(255) NOT NULL,
@@ -27,7 +27,17 @@ input_port varchar(255),
 filepath varchar(255),
 location varchar(255),
 PRIMARY KEY (service_id)
-)
+);
 
-INSERT INTO service_registry (context, protocol, input_port, filepath, location)
-VALUES ('A','sodep', 'ProfileA','/profileA_service/ProfileA_Adapter.ol','socket://localhost:2001/');
+INSERT INTO adapter_registry(context, protocol, input_port, filepath, location)
+VALUES ('ProfileA_Adapter','sodep', 'ProfileA','/profileA_service/ProfileA_Adapter.ol','socket://localhost:2001/');
+
+INSERT INTO adapter_registry(context, protocol, input_port, filepath, location)
+VALUES ('ProfileB_Adapter','sodep', 'ProfileB','/profileB_service/ProfileB_Adapter.ol','socket://localhost:2002/');
+
+INSERT INTO adapter_registry(context, protocol, input_port, filepath, location)
+VALUES ('ProfileC_Adapter','sodep', 'ProfileC','/profileC_service/ProfileC_Adapter.ol','socket://localhost:2003/');
+
+UPDATE service_registry 
+SET context='ProfileA_Adapter'
+WHERE service_id='1';

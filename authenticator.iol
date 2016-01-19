@@ -1,3 +1,4 @@
 interface AuthenticatorInterface {
-	RequestResponse: login(string)(string)
+	OneWay: login(string)
+	OneWay: loadingMessage( string )
 }

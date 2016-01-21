@@ -1,19 +1,22 @@
 include "console.iol"
+include "runtime.iol"
 include "database.iol"
 include "string_utils.iol"
 include "person_iface.iol"
-
+include "math.iol"
 
 execution { concurrent }
 
 
-inputPort Server {
-	Location: "socket://localhost:8002/"
-	Protocol: http { .format = "json" }
-	Interfaces: Persons
+interface ShutdownInterface {
+OneWay: off(void)
 }
 
-
+inputPort UserDB_Service {
+	Location: "socket://localhost:8002/"
+	Protocol: http { .format = "json" }
+	Interfaces: Persons, ShutdownInterface
+}
 
 init
 {
@@ -25,12 +28,32 @@ init
 		.database = "test"; 		
 		.driver = "mysql"
 	};
-	connect@Database(connectionInfo)()
+	connect@Database(connectionInfo)();
 	
+	//generating and random service_id	
+	random@Math( )( random_service_id );
+	println@Console( "response.random: " + random_service_id)();
+	service_id = random_service_id;
+	
+	
+	/*Important: The service registers itself in service registry. It unregisters by 
+	using the shutdown() procedure like: http://localhost:8002/shutdown*/
+	scope(update){
+		install ( SQLException => println@Console("Inserting data to service registry")() );
+					q = "insert into service_registry(service_id, context, input_port, location) values("+ service_id + ",'ProfileA', 'UserDB_Service','socket://localhost:8002/')";
+					update@Database(q)(response);
+				
+		println@Console( "Registering status: " + response)()
+
+	}
 }
 
 main
 {
+	/*off();
+	keepRunning = true;
+	while(keepRunning){*/
+	
 	//Example: http://localhost:8002/retrieveAll
 	[ retrieveAll()(response) {
 		query@Database(
@@ -86,4 +109,19 @@ main
 		)(response.status)
 	} ]
 	
+	// shutdown DB: http://localhost:8002/shutdown
+	[shutdown(request)(response){
+		update@Database( "delete from service_registry where service_id=:id"{
+			.id = service_id
+		}
+		
+		)( sqlResponse);
+		response.values -> sqlResponse.row;
+		callExit@Runtime(service.this)()
+		
+		
+	}]
+	
+ 
+    
 }

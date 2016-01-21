@@ -6,6 +6,12 @@ include "/Dynamic_Embedding_Counter/clientInterface.iol"
 include "/profileC_service/twiceInterface.iol"
 include "authenticator.iol"
 
+outputPort ProfileA {
+	Location: "socket://localhost:2001/"
+	Protocol: sodep
+	Interfaces: AuthenticatorInterface	
+}
+
 inputPort ClientB{
 	Location: "socket://localhost:4003"
 	Protocol: sodep
@@ -29,7 +35,7 @@ main
 
 	request = args[0];
 	 //Saying wich profile is loaded
-	 login@Gateway(request)(answer)|
+	 login@Gateway(request)|
 	 println@Console(answer)()
 	 
 	 

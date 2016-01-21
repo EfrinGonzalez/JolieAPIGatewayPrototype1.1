@@ -18,6 +18,7 @@ password varchar(255),
 PRIMARY KEY (user_id)
 )
 
+-------------------------------------------
 CREATE TABLE adapter_registry
 (
 service_id int NOT NULL AUTO_INCREMENT,
@@ -41,3 +42,30 @@ VALUES ('ProfileC_Adapter','sodep', 'ProfileC','/profileC_service/ProfileC_Adapt
 UPDATE service_registry 
 SET context='ProfileA_Adapter'
 WHERE service_id='1';
+
+-----------------------------------------------
+CREATE TABLE service_registry
+(
+service_id int NOT NULL AUTO_INCREMENT,
+context varchar(255) NOT NULL,
+input_port varchar(255),
+location varchar(255),
+PRIMARY KEY (service_id)
+);
+
+
+INSERT INTO service_registry(service_id , context, input_port, location)
+VALUES ('ProfileA', 'Server','socket://localhost:2001/');
+------------------------------
+CREATE TABLE service_registry
+(
+service_id double NOT NULL,
+context varchar(255) NOT NULL,
+input_port varchar(255),
+location varchar(255),
+PRIMARY KEY (service_id)
+);
+
+example:
+INSERT INTO service_registry(service_id , context, input_port, location)
+VALUES ('0.3943934','ProfileA', 'Server','socket://localhost:2001/');

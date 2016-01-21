@@ -1,26 +1,41 @@
 include "console.iol"
 include "database.iol"
 include "time.iol"
-include "/Dynamic_Embedding_Counter/counterInterface.iol"
-include "/Dynamic_Embedding_Counter/embedderInterface.iol"
-include "/Dynamic_Embedding_Counter/clientInterface.iol"
-include "/profileC_service/twiceInterface.iol"
+include "../db_service/person_iface.iol"
 include "runtime.iol"
 include "authenticator.iol"
+include "protocols/http.iol"
+include "MonitoringTool/LeonardoWebServer/config.iol"
 
 execution{ concurrent }
 
-outputPort CounterService{
-	Interfaces: CounterInterface
+
+//Important: The gateway runs the monitoring service
+outputPort Monitor {
+	Location: "socket://localhost:8005/"
+	//Protocol: http { .format = "json" }
+	Interfaces: Persons
 }
 
-
+//Important: the gateway runs the leonardo server to show what it is in the monitoring service
+outputPort HTTPInput {
+	Location: Location_Leonardo
+	//Protocol: http { .format = "json" }
+	//Interfaces: HTTPInterface
+}
 
 inputPort Gateway{
 	Location: "socket://localhost:2000"
 	Protocol: sodep
-	Interfaces: CounterEmbedderInterface, AuthenticatorInterface
+	Interfaces: AuthenticatorInterface
+	Redirects: MonitoringTool => Monitor,	
+			   LeonardoWebServer => HTTPInput
 }
+
+embedded {
+		Jolie:  "/MonitoringTool/Monitor.ol" in Monitor,
+		        "MonitoringTool/LeonardoWebServer/leonardo.ol"
+		}
 	
 init
 {
@@ -34,26 +49,15 @@ init
 	};
 	connect@Database(connectionInfo)();
 	println@Console( "Database connection successful!!!")()
-	
-	/*q = "select * from service_registry where service_id=:service_id" ;
-		 //q.service_id=1;
-		 q.service_id=args[0];				
-	query@Database(q)(result);	
-	println@Console( "Service context: "+ result.row[0].context +
-					 "--"+	
-					 "Service protocol: "+ result.row[0].protocol +
-					 "--"+	
-					 "Service Input port: "+ result.row[0].input_port +
-					 "--"+
-					 "Service Filepath: "+ result.row[0].filepath +
-					 "--"+
-					 "Service Location: "+ result.row[0].location)()*/
 }			
 
 main
 {
 	login(profile);
-		println@Console("Welcome!")();
+	/*Important: Here, is is needed to use the comming profile data. Therefore, it is better
+	to have this connection logic here, instead of having it on the init procedure.*/
+	
+	println@Console("Welcome!")();
 		q = "select * from adapter_registry where service_id=:service_id" ;		 
 		q.service_id=profile;
 		//q.service_id=args[0];
@@ -72,16 +76,10 @@ main
 						 "\n"+
 						 "Service Location: "+ result.row[0].location)();
 
-	
-			//answer = "Everything seems to be ok...!";
 			embedInfo.type = "Jolie";
 			keepRunning = true;
 			embedInfo.filepath = result.row[0].filepath;
 			loadEmbeddedService@Runtime( embedInfo )( result.row[0].context.location );
-			
-			
-			
-			
 			
 			while( keepRunning ){	
 				keepRunning = true

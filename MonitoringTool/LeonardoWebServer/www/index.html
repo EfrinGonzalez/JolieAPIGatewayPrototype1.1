@@ -3,11 +3,14 @@
 <body>
 
 <div ng-app="myApp" ng-controller="customersCtrl"> 
-
-<h1>Requesting Persons table</h1>
+<h1>Monitoring tool</h1>
+<h2>Up running services</h2>
 <ul>
   <li ng-repeat="x in values">
-    {{ x.personid + ', ' + x.name }}
+    {{ x.service_id + ', ' + 
+	   x.context + ', ' +
+	   x.input_port+ ', ' +
+	   x.location}}
   </li>
 </ul>
 
@@ -17,7 +20,7 @@
 
 var app = angular.module('myApp', []);
 app.controller('customersCtrl', function($scope, $http) {
-    $http.get("http://localhost:8001/retrieveAll")
+    $http.get("http://localhost:8005/retrieveAll")
     .then(function(response) {$scope.values = response.data.values;});
 });
 </script>

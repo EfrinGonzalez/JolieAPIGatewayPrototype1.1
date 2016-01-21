@@ -11,6 +11,7 @@ RequestResponse:
 	retrieve(undefined)(undefined),
 	update(undefined)(undefined),
 	delete(undefined)(undefined)
+	
 }
 
 inputPort Server {
@@ -32,22 +33,10 @@ init
 		.driver = "mysql"
 	};
 	connect@Database(connectionInfo)()
-	//connect@Database(connectionInfo)();
-	
-	
-	// create table if it does not exist
-	//scope (createTable) {
-	//	install (SQLException => println@Console("TodoItem table already there")());
-	//	update@Database(
-	//	    "insert into persons values(4, 'Josue');"
-	//	)(ret)
-	//}
 }
 
 main
-{
-	//println@Console("connected")()
-	
+{	
 	//Example: http://localhost:8001/retrieveAll
 	[ retrieveAll()(response) {
 		query@Database(

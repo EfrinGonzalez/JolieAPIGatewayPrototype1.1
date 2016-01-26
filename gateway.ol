@@ -2,13 +2,19 @@ include "console.iol"
 include "database.iol"
 include "time.iol"
 include "../db_service/person_iface.iol"
+include "/db_service/user_iface.iol"
 include "runtime.iol"
-include "authenticator.iol"
+//include "authenticator.iol"
 include "protocols/http.iol"
 include "MonitoringTool/LeonardoWebServer/config.iol"
 
 execution{ concurrent }
 
+outputPort Auth_Service{
+	Location: "socket://localhost:9000"
+	Protocol: sodep
+	Interfaces: Users
+}
 
 //Important: The gateway runs the monitoring service
 outputPort Monitor {
@@ -27,14 +33,15 @@ outputPort HTTPInput {
 inputPort Gateway{
 	Location: "socket://localhost:2000"
 	Protocol: sodep
-	Interfaces: AuthenticatorInterface
+	Interfaces: Users
 	Redirects: MonitoringTool => Monitor,	
 			   LeonardoWebServer => HTTPInput
 }
 
 embedded {
 		Jolie:  "/MonitoringTool/Monitor.ol" in Monitor,
-		        "MonitoringTool/LeonardoWebServer/leonardo.ol"
+		        "/MonitoringTool/LeonardoWebServer/leonardo.ol",
+				"/auth_service/Auth.ol"
 		}
 	
 init
@@ -53,7 +60,17 @@ init
 
 main
 {
-	login(profile);
+	login(user);
+	profile = user.profile;
+	println@Console("Email: "+user.email)();
+	println@Console("Name: "+user.name)();
+	println@Console("Profile "+user.profile)();
+	
+	
+	auth@Auth_Service(user)(response);
+	println@Console("Authentication response is: " + response)();
+	
+	//login(profile);
 	/*Important: Here, is is needed to use the comming profile data. Therefore, it is better
 	to have this connection logic here, instead of having it on the init procedure.*/
 	

@@ -1,6 +1,7 @@
 type User:void {
 	.email:string
 	.name:string
+	.profile:string
 }
 
 interface Users {
@@ -10,11 +11,10 @@ RequestResponse:
 	retrieve(undefined)(undefined),
 	update(undefined)(undefined),
 	delete(undefined)(undefined),
-	twice( int )( int ) 
+	twice( int )( int ),
+	auth(User)(bool)
+	
+OneWay: login(User)	
 }
 
-//Just in case
-/*interface MyInterface {
-RequestResponse:
-	sayHello( User )( string )
-}*/
+

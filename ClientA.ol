@@ -7,22 +7,10 @@ include "/profileC_service/twiceInterface.iol"
 include "authenticator.iol"
 include "/db_service/user_iface.iol"
 
-inputPort ClientA{
-	Location: "socket://localhost:4002"
-	Protocol: sodep
-	Interfaces: Users
-}
-
 outputPort Gateway{
 	Location: "socket://localhost:2000"
 	Protocol: sodep
 	Interfaces: Users
-}
-
-outputPort TwiceService {
-	Location: "socket://localhost:2004/"
-	Protocol: sodep
-	Interfaces: TwiceInterface
 }
 
 outputPort ProfileA {
@@ -30,6 +18,14 @@ outputPort ProfileA {
 	Protocol: sodep
 	Interfaces: AuthenticatorInterface	
 }
+
+inputPort ClientA{
+	Location: "socket://localhost:4002"
+	Protocol: sodep
+	Interfaces: Users
+}
+
+
 
 main
 {

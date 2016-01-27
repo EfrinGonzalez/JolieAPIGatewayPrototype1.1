@@ -4,6 +4,7 @@ include "database.iol"
 include "string_utils.iol"
 include "person_iface.iol"
 include "math.iol"
+include "/db_service/DBConnector_iface.iol"
 
 execution { concurrent }
 
@@ -11,23 +12,21 @@ execution { concurrent }
 interface ShutdownInterface {
 OneWay: off(void)
 }
+outputPort DB_Connector {
+	Location: "socket://localhost:1000/"
+	Protocol: sodep
+	Interfaces: ConnectionPool
+}
 
 inputPort UserDB_Service {
 	Location: "socket://localhost:8002/"
 	Protocol: http { .format = "json" }
-	Interfaces: Persons, ShutdownInterface
+	Interfaces: Persons, ShutdownInterface, ConnectionPool
 }
 
 init
 {
-	with (connectionInfo) {
-		.username = "";
-		.password = "";
-		.host = "127.0.0.1";
-		.port = 3306;
-		.database = "test"; 		
-		.driver = "mysql"
-	};
+	connectionConfigInfo@DB_Connector()(connectionInfo);
 	connect@Database(connectionInfo)();
 	
 	//generating and random service_id	

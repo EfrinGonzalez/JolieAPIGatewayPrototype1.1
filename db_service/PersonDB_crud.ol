@@ -1,19 +1,17 @@
 include "console.iol"
 include "database.iol"
 include "string_utils.iol"
+include "person_iface.iol"
+include "math.iol"
+include "/db_service/DBConnector_iface.iol"
 
 execution { concurrent }
 
-interface Persons {
-RequestResponse:
-	retrieveAll(void)(undefined),
-	create(undefined)(undefined),
-	retrieve(undefined)(undefined),
-	update(undefined)(undefined),
-	delete(undefined)(undefined)
-	
+outputPort DB_Connector {
+	Location: "socket://localhost:1000/"
+	Protocol: sodep
+	Interfaces: ConnectionPool
 }
-
 inputPort Server {
 	Location: "socket://localhost:8001/"
 	Protocol: http { .format = "json" }
@@ -24,15 +22,25 @@ inputPort Server {
 
 init
 {
-	with (connectionInfo) {
-		.username = "";
-		.password = "";
-		.host = "127.0.0.1";
-		.port = 3306;
-		.database = "test"; 		
-		.driver = "mysql"
-	};
-	connect@Database(connectionInfo)()
+	connectionConfigInfo@DB_Connector()(connectionInfo);
+	connect@Database(connectionInfo)();
+	
+	//generating and random service_id	
+	random@Math( )( random_service_id );
+	println@Console( "response.random: " + random_service_id)();
+	service_id = random_service_id;
+	
+	
+	/*Important: The service registers itself in service registry. It unregisters by 
+	using the shutdown() procedure like: http://localhost:8001/shutdown*/
+	scope(update){
+		install ( SQLException => println@Console("Inserting data to service registry")() );
+					q = "insert into service_registry(service_id, context, input_port, location) values("+ service_id + ",'ProfileB', 'PersonDB_Service','socket://localhost:8001/')";
+					update@Database(q)(response);
+				
+		println@Console( "Registering status: " + response)()
+
+	}
 }
 
 main

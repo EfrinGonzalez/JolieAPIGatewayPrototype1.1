@@ -23,14 +23,15 @@ outputPort Auth_Service{
 	Interfaces: Users
 }
 
-//Important: The gateway runs the monitoring service
+//Note: The gateway runs the monitoring service
 outputPort Monitor {
 	Location: "socket://localhost:8005/"
 	//Protocol: http { .format = "json" }
 	Interfaces: Persons
 }
 
-//Important: the gateway runs the leonardo server to show what it is in the monitoring service
+//Note: the gateway runs the leonardo server to show what it is 
+//in the monitoring service.
 outputPort HTTPInput {
 	Location: Location_Leonardo
 	//Protocol: http { .format = "json" }
@@ -45,40 +46,19 @@ inputPort Gateway{
 			   LeonardoWebServer => HTTPInput
 }
 
-embedded {
+embedded 
+{
 		Jolie:  "/MonitoringTool/Monitor.ol" in Monitor,
 		        "/MonitoringTool/LeonardoWebServer/leonardo.ol" in HTTPInput,
 				"/auth_service/Auth.ol",
 				"/db_service/DBConnector.ol"
-		}
+}
 	
 init
 {
-	/*with (connectionInfo) {
-		.username = "";
-		.password = "";
-		.host = "127.0.0.1";
-		.port = 3306;
-		.database = "test"; 		
-		.driver = "mysql"
-	};
-	connect@Database(connectionInfo)();
-	println@Console( "Database connection successful!!!")()*/
-	
-	
-	//trying connecting DBConnector
 	connectionConfigInfo@DB_Connector()(connectionInfo);
-	
-	println@Console( "username: "+ connectionInfo.username)();
-	println@Console( "password: "+ connectionInfo.password)();
-	println@Console( "host: "+ connectionInfo.host)();
-	println@Console( "port: "+ connectionInfo.port)();
-	println@Console( "database: "+ connectionInfo.database)();
-	println@Console( "driver: "+ connectionInfo.driver)();
-	
 	connect@Database(connectionInfo)()
-	
-	
+		
 }			
 
 main
@@ -94,12 +74,8 @@ main
 	
 	auth@Auth_Service(user)(response);
 	println@Console("Authentication response is: " + response)();
-if(response = true){	
-	//login(profile);
-	/*Important: Here, is is needed to use the comming profile data. Therefore, it is better
-	to have this connection logic here, instead of having it on the init procedure.*/
-	
-	println@Console("Welcome!")();
+	if(response = true){				
+		println@Console("Welcome!")();
 		q = "select * from adapter_registry where service_id=:service_id" ;		 
 		q.service_id=profile;
 		//q.service_id=args[0];
@@ -126,9 +102,9 @@ if(response = true){
 			while( keepRunning ){	
 				keepRunning = true
 			}
-			
-}			
-	
+				
+	}			
+		
 		
 		
 	

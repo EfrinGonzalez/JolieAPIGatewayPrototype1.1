@@ -14,7 +14,8 @@ RequestResponse:
 	twice( int )( int ),
 	auth(User)(bool)
 	
-OneWay: login(User)	
+OneWay: 
+	login(User)	
 }
 
 

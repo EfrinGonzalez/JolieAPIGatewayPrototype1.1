@@ -3,8 +3,8 @@ include "database.iol"
 include "string_utils.iol"
 include "../db_service/person_iface.iol"
 
-execution { concurrent }
 
+execution { concurrent }
 
 inputPort Monitor {
 	Location: "socket://localhost:8005/"
@@ -25,6 +25,7 @@ init
 		.driver = "mysql"
 	};
 	connect@Database(connectionInfo)()
+	
 }
 
 main

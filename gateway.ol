@@ -3,12 +3,19 @@ include "database.iol"
 include "time.iol"
 include "../db_service/person_iface.iol"
 include "/db_service/user_iface.iol"
+include "/db_service/DBConnector_iface.iol"
 include "runtime.iol"
 //include "authenticator.iol"
 include "protocols/http.iol"
 include "MonitoringTool/LeonardoWebServer/config.iol"
 
 execution{ concurrent }
+
+outputPort DB_Connector {
+	Location: "socket://localhost:1000/"
+	Protocol: sodep
+	Interfaces: ConnectionPool
+}
 
 outputPort Auth_Service{
 	Location: "socket://localhost:9000"
@@ -33,20 +40,21 @@ outputPort HTTPInput {
 inputPort Gateway{
 	Location: "socket://localhost:2000"
 	Protocol: sodep
-	Interfaces: Users
+	Interfaces: Users, ConnectionPool
 	Redirects: MonitoringTool => Monitor,	
 			   LeonardoWebServer => HTTPInput
 }
 
 embedded {
 		Jolie:  "/MonitoringTool/Monitor.ol" in Monitor,
-		        "/MonitoringTool/LeonardoWebServer/leonardo.ol",
-				"/auth_service/Auth.ol"
+		        "/MonitoringTool/LeonardoWebServer/leonardo.ol" in HTTPInput,
+				"/auth_service/Auth.ol",
+				"/db_service/DBConnector.ol"
 		}
 	
 init
 {
-	with (connectionInfo) {
+	/*with (connectionInfo) {
 		.username = "";
 		.password = "";
 		.host = "127.0.0.1";
@@ -55,7 +63,22 @@ init
 		.driver = "mysql"
 	};
 	connect@Database(connectionInfo)();
-	println@Console( "Database connection successful!!!")()
+	println@Console( "Database connection successful!!!")()*/
+	
+	
+	//trying connecting DBConnector
+	connectionConfigInfo@DB_Connector()(connectionInfo);
+	
+	println@Console( "username: "+ connectionInfo.username)();
+	println@Console( "password: "+ connectionInfo.password)();
+	println@Console( "host: "+ connectionInfo.host)();
+	println@Console( "port: "+ connectionInfo.port)();
+	println@Console( "database: "+ connectionInfo.database)();
+	println@Console( "driver: "+ connectionInfo.driver)();
+	
+	connect@Database(connectionInfo)()
+	
+	
 }			
 
 main
@@ -67,9 +90,11 @@ main
 	println@Console("Profile "+user.profile)();
 	
 	
+	
+	
 	auth@Auth_Service(user)(response);
 	println@Console("Authentication response is: " + response)();
-	
+if(response = true){	
 	//login(profile);
 	/*Important: Here, is is needed to use the comming profile data. Therefore, it is better
 	to have this connection logic here, instead of having it on the init procedure.*/
@@ -102,7 +127,7 @@ main
 				keepRunning = true
 			}
 			
-			
+}			
 	
 		
 		
